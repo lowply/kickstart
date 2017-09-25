@@ -1,0 +1,5 @@
+#!/bin/bash
+
+USERNAME="sho"
+
+[ "$(whoami)" == "root" ] || { echo "Need to be root"; exit 1; }
