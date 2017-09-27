@@ -12,3 +12,4 @@ enabled=1
 EOF
 yum install -y nginx
 systemctl start nginx
+systemctl enable nginx

@@ -31,4 +31,6 @@ yum -y install \
 	bind-utils \
 	dstat \
 	net-tools \
-	yum-cron
+	httpd \
+	yum-cron \
+	epel-release \

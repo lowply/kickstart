@@ -10,3 +10,6 @@
 ./07_tmux.sh
 ./08_nginx.sh
 ./09_docker.sh
+./10_nagios.sh
+./11_munin.sh
+./12_mariadb.sh
