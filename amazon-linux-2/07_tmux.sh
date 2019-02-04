@@ -2,7 +2,7 @@
 
 . ./lib
 
-VERSION="2.5"
+VERSION="2.8"
 
 echo "Install tmux"
 yum -y install libevent-devel ncurses-devel

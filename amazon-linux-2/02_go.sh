@@ -2,15 +2,8 @@
 
 . ./lib
 
-VERSION="1.11.5"
-
 echo "Install Go"
-cd /usr/local/src/
-curl -OL https://dl.google.com/go/go${VERSION}.linux-amd64.tar.gz
-tar vxzf go${VERSION}.linux-amd64.tar.gz
-mv go /usr/local/
-cd /usr/local/bin/
-ln -s /usr/local/go/bin/* .
+sudo amazon-linux-extras install golang1.11
 su -l -c "mkdir ~/go" ${USERNAME}
 
 echo "Install ghq"

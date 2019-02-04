@@ -2,7 +2,7 @@
 
 . ./lib
 
-echo "Install Munin"
+echo "Install MariaDB"
 yum -y install mariadb mariadb-server
 
 systemctl start mariadb

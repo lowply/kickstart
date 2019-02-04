@@ -36,3 +36,6 @@ yum -y install \
 	yum-cron \
     python3 \
     git
+
+echo "Installing epel"
+sudo amazon-linux-extras install epel
