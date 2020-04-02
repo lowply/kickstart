@@ -2,6 +2,8 @@
 
 . ./lib
 
+PATH="/usr/local/bin:$PATH"
+
 echo "Creating a new user"
 useradd -g wheel ${USERNAME}
 echo "lowply ALL=(ALL) NOPASSWD: ALL" | tee /etc/sudoers.d/lowply
@@ -17,7 +19,7 @@ su ${USERNAME} -c "chmod 600 ~/.ssh/authorized_keys"
 su ${USERNAME} -c "go get github.com/x-motemen/ghq"
 
 echo "Install dotfiles"
-su ${USERNAME} -c "/bin/git clone https://github.com/lowply/dotfiles.git ~/dotfiles"
+su ${USERNAME} -c "git clone https://github.com/lowply/dotfiles.git ~/dotfiles"
 su ${USERNAME} -c "~/dotfiles/bin/install.sh"
 
 echo "Creating ~/go"

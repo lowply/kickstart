@@ -2,5 +2,4 @@
 
 . ./lib
 
-echo "Install vim"
-amazon-linux-extras install vim
+echo "Do nothing"

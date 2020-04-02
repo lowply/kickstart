@@ -35,6 +35,7 @@ yum -y install \
 	httpd \
 	yum-cron \
 	python3 \
+    vim \
 	git
 
 echo "Installing epel"
