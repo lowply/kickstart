@@ -3,8 +3,11 @@
 . ./lib
 
 echo "Install Go"
-sudo amazon-linux-extras install golang1.11
-su -l -c "mkdir ~/go" ${USERNAME}
+VERSION="1.14.1"
+curl -OL https://dl.google.com/go/go${VERSION}.linux-amd64.tar.gz
 
-echo "Install ghq"
-su -l -c "go get github.com/motemen/ghq" ${USERNAME}
+# For A1 instances
+# curl -OL https://dl.google.com/go/go${VERSION}.linux-arm64.tar.gz
+tar vxzf go${VERSION}.linux-amd64.tar.gz
+mv go /usr/local/go
+ln -s /usr/local/go/bin/go* /usr/local/bin/

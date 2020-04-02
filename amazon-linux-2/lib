@@ -12,7 +12,7 @@ color(){
 		white) local COLOR="\e[37m" ;;
 		*) local COLOR="\e[37m" ;;
 	esac
-    local RESET="\e[39m"
+	local RESET="\e[39m"
 	printf "${COLOR}${2}${RESET}\n"
 }
 
@@ -51,6 +51,6 @@ has(){
 	type ${1} >/dev/null 2>&1 || abort "Command not found: ${1}"
 }
 
-USERNAME="sho"
+USERNAME="lowply"
 
 [ "$(whoami)" == "root" ] || abort "Need to be root"
