@@ -113,7 +113,7 @@ run_user(){
 
     debug "Adding a pubkey"
     su ${USERNAME} -lc "mkdir ~/.ssh && chmod 700 ~/.ssh"
-    su ${USERNAME} -lc "curl -s -o ~/.ssh/authorized_keys https://github.com/${USERNAME}.keys"
+    su ${USERNAME} -lc "curl -s -o ~/.ssh/authorized_keys https://github.com/lowply.keys"
     su ${USERNAME} -lc "chmod 600 ~/.ssh/authorized_keys"
 
     debug "Installing ghq"
