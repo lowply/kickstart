@@ -184,17 +184,15 @@ run_munin(){
     systemctl enable munin-node
 }
 
-main(){
-    run_packages
-    run_ssh
-    run_date
-    run_go
-    run_user
-    run_crontab
-    run_node
-    run_tmux
-    run_munin
+run_packages
+run_ssh
+run_date
+run_go
+run_user
+run_crontab
+run_node
+run_tmux
+run_munin
 
-    # TODO
-    # Nagios, docker-compose
-}
+# TODO
+# Nagios, docker-compose
