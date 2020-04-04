@@ -39,12 +39,12 @@ EOF
 
 aws --profile ${KS_AL_PROFILE} \
     ec2 run-instances \
+    --subnet-id "${KS_AL_SUBNET}" \
+    --security-group-ids "${KS_AL_SEC}" \
+    --instance-type "${KS_AL_TYPE}" \
+    --image-id "${AMI}" \
     --block-device-mappings "${BDM}" \
     --ebs-optimized \
-    --image-id "${AMI}" \
-    --instance-type "${KS_AL_TYPE}" \
     --key-name "${KS_AL_KEY}" \
-    --security-group-ids \
-    --subnet-id "${KS_AL_SUBNET}" \
-    --user-data "file://user-data" \
+    --user-data "file://user-data.sh" \
     > result.json
