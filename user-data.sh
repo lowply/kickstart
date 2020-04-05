@@ -47,6 +47,7 @@ run_packages(){
         dstat \
         net-tools \
         httpd \
+        mod_ssl \
         yum-cron \
         python3 \
         vim \
@@ -130,7 +131,7 @@ run_user(){
 # =========================================
 
 run_crontab(){
-    echo "0 7 * * * /home/${USERNAME}/.ghq/github.com/lowply/dotfiles/bin/pull_dotfiles.sh >/dev/null" > /var/spool/cron/${USERNAME}
+    echo "0 7 * * * /home/${USERNAME}/ghq/github.com/lowply/dotfiles/bin/pull_dotfiles.sh >/dev/null" > /var/spool/cron/${USERNAME}
     chown ${USERNAME}:wheel /var/spool/cron/${USERNAME}
     chmod 600 /var/spool/cron/${USERNAME}
 }
