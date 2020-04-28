@@ -21,42 +21,48 @@ run_packages(){
     yum -y update
 
     debug "Installing dev tools"
-    yum -y groupinstall "Development Tools"
+    yum -y groupinstall --with-optional "Development Tools"
 
     debug "Installing essential packages"
     yum -y install \
-        gcc \
-        cmake \
-        autoconf \
-        patch \
         perl-devel \
-        curl-devel \
         expat-devel \
         readline-devel \
         sqlite-devel \
         bzip2-devel \
         zlib-devel \
-        man \
-        bash-completion \
-        openssl \
         openssl-devel \
-        asciidoc \
+        bash-completion \
         xmlto \
-        pwgen \
         bind-utils \
         dstat \
         net-tools \
-        httpd \
-        yum-cron \
-        python3 \
-        vim \
-        docker \
+        nginx \
+        vim-enhanced \
         mariadb \
         mariadb-server \
-        git
+        mariadb-devel
+
+    debug "Installing python"
+    if [ -n "${IS_CL}" ]; then
+        yum -y install python36
+    else
+        yum -y install python3
+    fi
+
+    debug "Installing Docker / Podman"
+    if [ -n "${IS_CL}" ]; then
+        yum -y install podman podman-docker
+    else
+        yum -y install docker
+    fi
 
     debug "Installing epel"
-    sudo amazon-linux-extras install epel
+    if [ -n "${IS_CL}" ]; then
+        rpm -i https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+    else
+        amazon-linux-extras install epel
+    fi
 
     ln -s /usr/share/git-core/contrib/diff-highlight /usr/local/bin
 }
@@ -68,6 +74,10 @@ run_packages(){
 run_ssh(){
     debug "Change SSH port"
     sed -i 's/#Port 22/Port 1417/' /etc/ssh/sshd_config
+    if [ -n "${IS_CL}" ]; then
+        sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+        sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
+    fi
     systemctl restart sshd
 }
 
@@ -86,7 +96,7 @@ run_date(){
 
 run_go(){
     debug "Install Go"
-    GO_VERSION="1.14.1"
+    GO_VERSION="1.14.2"
 
     uname -a | grep -q x86_64 && GO_ARCH="amd64"
     uname -a | grep -q aarch64 && GO_ARCH="arm64"
@@ -130,7 +140,7 @@ run_user(){
 # =========================================
 
 run_crontab(){
-    echo "0 7 * * * /home/${USERNAME}/.ghq/github.com/lowply/dotfiles/bin/pull_dotfiles.sh >/dev/null" > /var/spool/cron/${USERNAME}
+    echo "0 7 * * * /home/${USERNAME}/ghq/github.com/lowply/dotfiles/bin/pull_dotfiles.sh >/dev/null" > /var/spool/cron/${USERNAME}
     chown ${USERNAME}:wheel /var/spool/cron/${USERNAME}
     chmod 600 /var/spool/cron/${USERNAME}
 }
@@ -159,7 +169,7 @@ run_node(){
 # =========================================
 
 run_tmux(){
-    TMUX_VERSION="3.0a"
+    TMUX_VERSION="3.1"
 
     debug "Install tmux"
     yum -y install libevent-devel ncurses-devel
@@ -178,11 +188,32 @@ run_tmux(){
 
 run_munin(){
     debug "Install Munin"
+
+    if [ -n "${IS_CL}" ]; then
+        dnf config-manager --set-enabled PowerTools
+    fi
+
     yum -y install munin --enablerepo=epel
 
     systemctl start munin-node
     systemctl enable munin-node
 }
+
+# =========================================
+# main
+# =========================================
+
+IS_CL=$(cat /etc/redhat-release 2>/dev/null | grep "CentOS Linux release 8")
+IS_AL=$(cat /etc/system-release 2>/dev/null | grep "Amazon Linux release 2")
+
+[ -z "${IS_CL}" -a -z "${IS_AL}" ] && abort "This script is only available on CentOS 8 or Amazon Linux 2."
+
+if [ -n "${IS_CL}" ]; then
+    setenforce 0
+    sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
+    systemctl stop firewalld
+    systemctl disable firewalld
+fi
 
 run_packages
 run_ssh
@@ -194,5 +225,3 @@ run_node
 run_tmux
 run_munin
 
-# TODO
-# Nagios, docker-compose
