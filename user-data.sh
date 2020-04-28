@@ -21,37 +21,27 @@ run_packages(){
     yum -y update
 
     debug "Installing dev tools"
-    yum -y groupinstall "Development Tools"
+    yum -y groupinstall --with-optional "Development Tools"
 
     debug "Installing essential packages"
     yum -y install \
-        gcc \
-        make \
-        cmake \
-        autoconf \
-        patch \
         perl-devel \
-        curl-devel \
         expat-devel \
         readline-devel \
         sqlite-devel \
         bzip2-devel \
         zlib-devel \
-        man \
-        bash-completion \
-        openssl \
         openssl-devel \
-        asciidoc \
+        bash-completion \
         xmlto \
         bind-utils \
         dstat \
         net-tools \
         nginx \
-        mod_ssl \
-        vim \
+        vim-enhanced \
         mariadb \
         mariadb-server \
-        git
+        mariadb-devel
 
     debug "Installing python"
     if [ -n "${IS_CL}" ]; then
@@ -62,7 +52,7 @@ run_packages(){
 
     debug "Installing Docker / Podman"
     if [ -n "${IS_CL}" ]; then
-        yum -y install podman-docker
+        yum -y install podman podman-docker
     else
         yum -y install docker
     fi
