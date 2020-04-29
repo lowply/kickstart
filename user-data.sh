@@ -45,23 +45,23 @@ run_packages(){
         mariadb-devel
 
     debug "Installing python"
-    if [ -n "${IS_CL}" ]; then
+    if [ ${OS} == "CL" ]; then
         yum -y install python36
-    else
+    elif [ ${OS} == "AL" ]; then
         yum -y install python3
     fi
 
     debug "Installing Docker / Podman"
-    if [ -n "${IS_CL}" ]; then
+    if [ ${OS} == "CL" ]; then
         yum -y install podman podman-docker
-    else
+    elif [ ${OS} == "AL" ]; then
         yum -y install docker
     fi
 
     debug "Installing epel"
-    if [ -n "${IS_CL}" ]; then
+    if [ ${OS} == "CL" ]; then
         rpm -i https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-    else
+    elif [ ${OS} == "AL" ]; then
         amazon-linux-extras install epel
     fi
 
@@ -75,7 +75,7 @@ run_packages(){
 run_ssh(){
     debug "Change SSH port"
     sed -i 's/#Port 22/Port 1417/' /etc/ssh/sshd_config
-    if [ -n "${IS_CL}" ]; then
+    if [ ${OS} == "CL" ]; then
         sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
         sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
     fi
@@ -192,7 +192,7 @@ run_tmux(){
 run_munin(){
     debug "Install Munin"
 
-    if [ -n "${IS_CL}" ]; then
+    if [ ${OS} == "CL" ]; then
         dnf config-manager --set-enabled PowerTools
     fi
 
@@ -208,14 +208,19 @@ run_munin(){
 
 [ "$(whoami)" == "root" ] || abort "This script must be ran by root."
 
-IS_CL=$(cat /etc/redhat-release 2>/dev/null | grep "CentOS Linux release 8")
-IS_AL=$(cat /etc/system-release 2>/dev/null | grep "Amazon Linux release 2")
+if [[ "$(cat /etc/system-release)" =~ "CentOS Linux release 8" ]]; then
+    OS="CL"
+elif [[ "$(cat /etc/system-release)" =~ "Amazon Linux release 2" ]]; then
+    OS="AL"
+fi
 
-[ -z "${IS_CL}" -a -z "${IS_AL}" ] && abort "This script is only available on CentOS 8 or Amazon Linux 2."
+[ -z "${OS}" ] && abort "This script is only available on CentOS 8.x or Amazon Linux 2."
 
-if [ -n "${IS_CL}" ]; then
-    setenforce 0
-    sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
+if [ $OS == "CL" ]; then
+    if [ $(getenforce) != "Disabled" ]; then
+        setenforce 0
+        sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
+    fi
     systemctl stop firewalld
     systemctl disable firewalld
 fi
