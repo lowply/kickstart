@@ -1,6 +1,7 @@
 #!/bin/bash
 
-USERNAME="lowply"
+set -e
+
 PATH="/usr/local/bin:$PATH"
 
 abort(){
@@ -107,6 +108,8 @@ run_go(){
         mv go /usr/local/go
         ln -s /usr/local/go/bin/go* /usr/local/bin/
     fi
+
+    mkdir ~/go 
 }
 
 # =========================================
@@ -114,6 +117,8 @@ run_go(){
 # =========================================
 
 run_user(){
+    USERNAME="lowply"
+
     debug "Creating a new user: ${USERNAME}"
     useradd -g wheel ${USERNAME}
     echo "${USERNAME} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/${USERNAME}
@@ -125,24 +130,22 @@ run_user(){
     su ${USERNAME} -lc "mkdir ~/.ssh && chmod 700 ~/.ssh"
     su ${USERNAME} -lc "curl -s -o ~/.ssh/authorized_keys https://github.com/lowply.keys"
     su ${USERNAME} -lc "chmod 600 ~/.ssh/authorized_keys"
-
-    debug "Installing ghq"
-    su ${USERNAME} -lc "mkdir ~/go" 
-    su ${USERNAME} -lc "go get github.com/x-motemen/ghq"
-
-    debug "Install dotfiles"
-    su ${USERNAME} -lc "~/go/bin/ghq get https://github.com/lowply/dotfiles.git"
-    su ${USERNAME} -lc "~/ghq/github.com/lowply/dotfiles/install do"
 }
 
 # =========================================
 # crontabs
 # =========================================
 
-run_crontab(){
-    echo "0 7 * * * /home/${USERNAME}/ghq/github.com/lowply/dotfiles/bin/pull_dotfiles.sh >/dev/null" > /var/spool/cron/${USERNAME}
-    chown ${USERNAME}:wheel /var/spool/cron/${USERNAME}
-    chmod 600 /var/spool/cron/${USERNAME}
+run_dotfiles(){
+    debug "Installing ghq"
+    go get github.com/x-motemen/ghq
+
+    debug "Install dotfiles"
+    ~/go/bin/ghq get https://github.com/lowply/dotfiles.git
+    ~/ghq/github.com/lowply/dotfiles/install do
+
+    echo '0 7 * * * ${HOME}/ghq/github.com/lowply/dotfiles/bin/pull_dotfiles.sh >/dev/null' >> /var/spool/cron/root
+    chmod 600 /var/spool/cron/root
 }
 
 # =========================================
@@ -203,6 +206,8 @@ run_munin(){
 # main
 # =========================================
 
+[ "$(whoami)" == "root" ] || abort "This script must be ran by root."
+
 IS_CL=$(cat /etc/redhat-release 2>/dev/null | grep "CentOS Linux release 8")
 IS_AL=$(cat /etc/system-release 2>/dev/null | grep "Amazon Linux release 2")
 
@@ -220,7 +225,7 @@ run_ssh
 run_date
 run_go
 run_user
-run_crontab
+run_dotfiles
 run_node
 run_tmux
 run_munin
