@@ -22,10 +22,16 @@ run_packages(){
     yum -y update
 
     debug "Installing dev tools"
-    yum -y groupinstall --with-optional "Development Tools"
+    if [ ${OS} == "CL" ]; then
+        yum -y groupinstall --with-optional "Development Tools"
+    elif [ ${OS} == "AL" ]; then
+        yum -y groupinstall "Development Tools"
+    fi
 
     debug "Installing essential packages"
     yum -y install \
+        rsync \
+        socat \
         perl-devel \
         expat-devel \
         readline-devel \
@@ -103,6 +109,7 @@ run_go(){
     uname -a | grep -q aarch64 && GO_ARCH="arm64"
 
     if [ -n "${GO_ARCH}" ]; then
+        cd /usr/local/src
         curl -OL https://dl.google.com/go/go${GO_VERSION}.linux-${GO_ARCH}.tar.gz
         tar xzf go${GO_VERSION}.linux-${GO_ARCH}.tar.gz
         mv go /usr/local/go
@@ -110,6 +117,43 @@ run_go(){
     fi
 
     mkdir ~/go 
+}
+
+# =========================================
+# node
+# =========================================
+
+run_node(){
+    debug "Install Node"
+    NODE_VERSION="12.16.1"
+
+    uname -a | grep -q x86_64 && NODE_ARCH="x64"
+    uname -a | grep -q aarch64 && NODE_ARCH="arm64"
+
+    if [ -n "${NODE_ARCH}" ]; then
+        cd /usr/local/src
+        curl -OL https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz
+        tar xJf node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz
+        mv node-v${NODE_VERSION}-linux-${NODE_ARCH} /usr/local/node
+        ln -s /usr/local/node/bin/* /usr/local/bin/
+    fi
+}
+
+# =========================================
+# tmux
+# =========================================
+
+run_tmux(){
+    TMUX_VERSION="3.1"
+
+    debug "Install tmux"
+    yum -y install libevent-devel ncurses-devel
+    cd /usr/local/src
+    curl -OL https://github.com/tmux/tmux/releases/download/${TMUX_VERSION}/tmux-${TMUX_VERSION}.tar.gz
+    tar xzf tmux-${TMUX_VERSION}.tar.gz
+    cd tmux-${TMUX_VERSION}
+    ./configure --prefix=/usr/local/tmux && make && make install
+    ln -s /usr/local/tmux/bin/tmux /usr/local/bin/
 }
 
 # =========================================
@@ -133,12 +177,12 @@ run_user(){
 }
 
 # =========================================
-# crontabs
+# dotfiles
 # =========================================
 
 run_dotfiles(){
     debug "Installing ghq"
-    go get github.com/x-motemen/ghq
+    /usr/local/bin/go get github.com/x-motemen/ghq
 
     debug "Install dotfiles"
     ~/go/bin/ghq get https://github.com/lowply/dotfiles.git
@@ -146,60 +190,6 @@ run_dotfiles(){
 
     echo '0 7 * * * ${HOME}/ghq/github.com/lowply/dotfiles/bin/pull_dotfiles.sh >/dev/null' >> /var/spool/cron/root
     chmod 600 /var/spool/cron/root
-}
-
-# =========================================
-# node
-# =========================================
-
-run_node(){
-    debug "Install Node"
-    NODE_VERSION="12.16.1"
-
-    uname -a | grep -q x86_64 && NODE_ARCH="x64"
-    uname -a | grep -q aarch64 && NODE_ARCH="arm64"
-
-    if [ -n "${NODE_ARCH}" ]; then
-        curl -OL https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz
-        tar xJf node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz
-        mv node-v${NODE_VERSION}-linux-${NODE_ARCH} /usr/local/node
-        ln -s /usr/local/node/bin/* /usr/local/bin/
-    fi
-}
-
-# =========================================
-# tmux
-# =========================================
-
-run_tmux(){
-    TMUX_VERSION="3.1"
-
-    debug "Install tmux"
-    yum -y install libevent-devel ncurses-devel
-    cd /usr/local/src
-    curl -OL https://github.com/tmux/tmux/releases/download/${TMUX_VERSION}/tmux-${TMUX_VERSION}.tar.gz
-    tar xzf tmux-${TMUX_VERSION}.tar.gz
-    cd tmux-${TMUX_VERSION}
-    ./configure --prefix=/usr/local/tmux
-    make && make install
-    ln -s /usr/local/tmux/bin/tmux /usr/local/bin/
-}
-
-# =========================================
-# munin
-# =========================================
-
-run_munin(){
-    debug "Install Munin"
-
-    if [ ${OS} == "CL" ]; then
-        dnf config-manager --set-enabled PowerTools
-    fi
-
-    yum -y install munin --enablerepo=epel
-
-    systemctl start munin-node
-    systemctl enable munin-node
 }
 
 # =========================================
@@ -229,9 +219,7 @@ run_packages
 run_ssh
 run_date
 run_go
-run_user
-run_dotfiles
 run_node
 run_tmux
-run_munin
-
+run_user
+run_dotfiles
