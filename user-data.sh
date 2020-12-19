@@ -124,7 +124,7 @@ run_go(){
 
 run_node(){
     debug "Install Node"
-    NODE_VERSION="12.16.1"
+    NODE_VERSION="14.5.3"
 
     uname -a | grep -q x86_64 && NODE_ARCH="x64"
     uname -a | grep -q aarch64 && NODE_ARCH="arm64"
