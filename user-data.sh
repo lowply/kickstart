@@ -45,7 +45,6 @@ run_packages(){
         dstat \
         net-tools \
         nginx \
-        vim-enhanced \
         mariadb \
         mariadb-server \
         mariadb-devel

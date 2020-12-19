@@ -5,3 +5,4 @@
 - Amazon Linux docker image isn't really the same with the actual instance and can't be used for testing
   - Use `run_ec2.sh` to to run an EC2 instance for testing
 - Compatible with A1 instances
+- Please install vim from the source, not via dnf/yum
