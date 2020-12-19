@@ -102,7 +102,7 @@ run_date(){
 
 run_go(){
     debug "Install Go"
-    GO_VERSION="1.14.2"
+    GO_VERSION="1.15.6"
 
     uname -a | grep -q x86_64 && GO_ARCH="amd64"
     uname -a | grep -q aarch64 && GO_ARCH="arm64"
